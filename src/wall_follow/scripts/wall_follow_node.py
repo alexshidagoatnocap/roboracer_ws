@@ -38,8 +38,6 @@ class WallFollow(Node):
         self.prev_error = 0.0
         self.error = 0.0
 
-        
-
     def get_range(self, laser_msg, angle):
         """
         Simple helper to return the corresponding range measurement at a given angle. Make sure you take care of NaNs and infs.
