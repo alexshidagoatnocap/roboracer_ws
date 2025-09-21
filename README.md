@@ -15,5 +15,11 @@ To Be Completed:
 - Pathfinding with RRT/RRT*
 - MPC
 
+## Instructions
+
+More instructions on how to run this in a Docker container alongside with the F1tenth simulator will be provided in the future. 
+
+The only way to currently use this workspace is to clone repo into Ubuntu 20.04 with ROS2 Foxy on it. Source the ROS2 Foxy setup and then cd into the workspace and run ```colcon build``` Once the workspace has built, source the workspace setup and run whichever nodes you want alongside the F1tenth simulator.
+
 
 
