@@ -8,8 +8,10 @@ Completed Nodes:
 - Automatic Emergency Braking (safety_node)
 - PID Wall Follower (wall_follow)
 
-To Be Completed:
+Working On:
 - Follow the Gap
+
+To Be Completed:
 - Pure Pursuit Controller
 - Stanley Controller
 - Pathfinding with RRT/RRT*
