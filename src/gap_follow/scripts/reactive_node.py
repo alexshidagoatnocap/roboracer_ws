@@ -12,24 +12,54 @@ class ReactiveFollowGap(Node):
     """
     def __init__(self):
         super().__init__('reactive_node')
+        
+        self.max_distance_threshold = 3.0
+        self.bubble_radius = 1
+        
         # Topics & Subs, Pubs
         lidarscan_topic = '/scan'
         drive_topic = '/drive'
 
-        # TODO: Subscribe to LIDAR
-        # TODO: Publish to drive
+        self.lidar_sub = self.create_subscription(LaserScan, lidarscan_topic, self.lidar_callback, 10)
+        self.drive_pub = self.create_publisher(AckermannDriveStamped, drive_topic, 10)
 
     def preprocess_lidar(self, ranges):
         """ Preprocess the LiDAR scan array. Expert implementation includes:
             1.Setting each value to the mean over some window
             2.Rejecting high values (eg. > 3m)
         """
-        proc_ranges = ranges
+        proc_ranges = np.array(ranges)
+        proc_ranges[proc_ranges > self.max_distance_threshold] = self.max_distance_threshold # make sure no distances are greater than max_distance
         return proc_ranges
 
     def find_max_gap(self, free_space_ranges):
         """ Return the start index & end index of the max gap in free_space_ranges
         """
+        # Find nearest lidar point and surround points with bubble of zero length ranges
+        nearest_range = float('inf')
+        nearest_range_index = -1
+
+        for i in range(len(free_space_ranges)):
+            if free_space_ranges[i] < nearest_range:
+                nearest_range = free_space_ranges[i]
+                nearest_range_index = i
+
+        if nearest_range_index != -1:
+            for i in range(nearest_range_index, nearest_range_index + self.bubble_radius):
+                    free_space_ranges[i] = 0.0
+
+            for i in range(nearest_range_index, nearest_range_index - self.bubble_radius, -1):
+                    free_space_ranges[i] = 0.0
+
+        # Find max length sequence of non-zero lengths
+        max_gap_index_start = 0
+        max_gap_counter = 0
+        current_gap_index_start = 0
+        current_gap_counter = 0
+
+        
+                
+
         return None
     
     def find_best_point(self, start_i, end_i, ranges):
@@ -42,7 +72,7 @@ class ReactiveFollowGap(Node):
     def lidar_callback(self, data):
         """ Process each LiDAR scan as per the Follow Gap algorithm & publish an AckermannDriveStamped Message
         """
-        ranges = data.ranges
+        ranges = np.array(data.ranges)
         proc_ranges = self.preprocess_lidar(ranges)
         
         # TODO:
