@@ -57,8 +57,16 @@ class ReactiveFollowGap(Node):
         current_gap_index_start = 0
         current_gap_counter = 0
 
-        
-                
+        for i in range(len(free_space_ranges)):
+            if free_space_ranges[i] == 0.0:
+                if current_gap_counter > max_gap_counter:
+                    max_gap_counter = current_gap_counter
+                    max_gap_index_start = current_gap_index_start
+                current_gap_counter = 0
+            else:
+                if current_gap_counter == 0:
+                    current_gap_index_start = i
+                current_gap_counter += 1
 
         return None
     
