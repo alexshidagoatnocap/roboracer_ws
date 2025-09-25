@@ -68,8 +68,8 @@ class ReactiveFollowGap(Node):
                     current_gap_index_start = i
                 current_gap_counter += 1
 
-        return None
-    
+        return (max_gap_index_start, max_gap_index_start + max_gap_counter)
+
     def find_best_point(self, start_i, end_i, ranges):
         """Start_i & end_i are start and end indicies of max-gap range, respectively
         Return index of best point in ranges
