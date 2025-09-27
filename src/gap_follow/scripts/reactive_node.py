@@ -16,7 +16,7 @@ class ReactiveFollowGap(Node):
         super().__init__('reactive_node')
 
         self.velocity = 1.5
-        self.max_distance_threshold = 3.0
+        self.max_distance_threshold = 10.0
         self.bubble_radius = 1
         self.processed_ranges = None
 
@@ -35,6 +35,11 @@ class ReactiveFollowGap(Node):
             Returns: numpy array of preprocessed ranges
         """
         proc_ranges = np.array(ranges)
+
+        for index in range(len(proc_ranges)):
+            if proc_ranges[index] == float('inf') or proc_ranges[index] == float('nan'):
+                proc_ranges[index] = 0.0
+
         proc_ranges[proc_ranges > self.max_distance_threshold] = self.max_distance_threshold # make sure no distances are greater than max_distance
         return proc_ranges
 
@@ -109,8 +114,8 @@ class ReactiveFollowGap(Node):
 
         #Publish Drive message
         drive_msg = AckermannDriveStamped()
-        drive_msg.steering_angle = drive_msg.angle_min + best_point * data.angle_increment
-        drive_msg.speed = self.velocity 
+        drive_msg.drive.steering_angle = data.angle_min + best_point * data.angle_increment
+        drive_msg.drive.speed = self.velocity
         self.drive_pub.publish(drive_msg)
 
 
