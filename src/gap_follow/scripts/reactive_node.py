@@ -15,12 +15,16 @@ class ReactiveFollowGap(Node):
     def __init__(self):
         super().__init__('reactive_node')
 
-        self.velocity = 1.5
-        self.max_distance_threshold = 3.0
-        self.bubble_radius = 1
+        self.velocity = 5.0
+        self.max_distance_threshold = 4.0
+        self.max_steering_angle = np.radians(40.0)
+        self.max_steering_sensitivity = 0.6
+        self.steering_sensitivity = self.max_steering_sensitivity
+        self.threshold = self.max_distance_threshold
+        self.bubble_radius = 12
         self.processed_ranges = None
         self.steering_angle_buffer = []
-        self.steering_angle_buffer_size = 5
+        self.steering_angle_buffer_size = 1
 
         # Topics & Subs, Pubs
         lidarscan_topic = '/scan'
@@ -104,14 +108,16 @@ class ReactiveFollowGap(Node):
                 furthest_point = i
 
         # Choose a biased point
-        self.processed_ranges[self.processed_ranges > self.max_distance_threshold] = self.max_distance_threshold # make sure no distances are greater than max_distance
+        self.processed_ranges[self.processed_ranges > self.threshold] = self.threshold # make sure no distances are greater than max_distance
         gap_length = end_i - start_i
-        biased_point = int(start_i + 0.6 * gap_length)
+        biased_point = int(start_i + 0.65 * gap_length)
 
         if furthest_point > biased_point:
             best_point = biased_point
+            #self.get_logger().info(f"Choosing biased point: {best_point}")
         else:
             best_point = furthest_point
+            #self.get_logger().info(f"Choosing furthest point: {best_point}")
 
         return best_point
 
@@ -132,23 +138,27 @@ class ReactiveFollowGap(Node):
         best_point = self.find_best_point(max_gap[0], max_gap[1])
 
         curr_steering_angle = data.angle_min + best_point * data.angle_increment
+        curr_steering_angle = np.clip(curr_steering_angle, -self.max_steering_angle, self.max_steering_angle)
 
-        # Average steering angle
+        # Average steering angle # if i set the buffer size to 1 it is better than not using the average at all somehow
         self.steering_angle_buffer.append(curr_steering_angle)
 
         if len(self.steering_angle_buffer) > self.steering_angle_buffer_size:
             self.steering_angle_buffer.pop(0)
-        avg_steering_angle = sum(self.steering_angle_buffer) / len(self.steering_angle_buffer)
+        avg_steering_angle = sum(self.steering_angle_buffer) / len(self.steering_angle_buffer) * self.steering_sensitivity
 
         #Publish Drive message
         drive_msg = AckermannDriveStamped()
         drive_msg.drive.steering_angle = avg_steering_angle
-        if np.abs(np.radians(avg_steering_angle)) >= 0.0 and np.abs(np.radians(avg_steering_angle)) < 10.0:
+        if np.abs(np.degrees(avg_steering_angle)) >= 0.0 and np.abs(np.degrees(avg_steering_angle)) < 10.0:
             drive_msg.drive.speed = self.velocity
-        elif np.abs(np.radians(avg_steering_angle)) >= 10.0 and np.abs(np.radians(avg_steering_angle)) < 20.0:
+            #self.steering_sensitivity = self.max_steering_sensitivity * 0.6
+        elif np.abs(np.degrees(avg_steering_angle)) >= 10.0 and np.abs(np.degrees(avg_steering_angle)) < 20.0:
             drive_msg.drive.speed = self.velocity * 0.66
+            #self.steering_sensitivity = self.max_steering_sensitivity * 0.65
         else:
-            drive_msg.drive.speed = self.velocity * 0.33
+            drive_msg.drive.speed = self.velocity * 0.55
+            #self.steering_sensitivity = self.max_steering_sensitivity * 0.7
 
         self.drive_pub.publish(drive_msg)
 
