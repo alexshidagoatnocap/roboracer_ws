@@ -40,7 +40,7 @@ class ReactiveFollowGap(Node):
             if proc_ranges[index] == float('inf') or proc_ranges[index] == float('nan'):
                 proc_ranges[index] = 0.0
 
-        proc_ranges[proc_ranges > self.max_distance_threshold] = self.max_distance_threshold # make sure no distances are greater than max_distance
+        #proc_ranges[proc_ranges > self.max_distance_threshold] = self.max_distance_threshold # make sure no distances are greater than max_distance
         return proc_ranges
 
     def find_max_gap(self):
@@ -55,12 +55,10 @@ class ReactiveFollowGap(Node):
                 nearest_range = self.processed_ranges[i]
                 nearest_range_index = i
 
-        if nearest_range_index != -1:
-            for i in range(nearest_range_index, nearest_range_index + self.bubble_radius):
-                    self.processed_ranges[i] = 0.0
-
-            for i in range(nearest_range_index, nearest_range_index - self.bubble_radius, -1):
-                    self.processed_ranges[i] = 0.0
+        # Clamp bubble indices to array bounds
+        start_bubble = max(0, nearest_range_index - self.bubble_radius)
+        end_bubble = min(len(self.processed_ranges), nearest_range_index + self.bubble_radius + 1)
+        self.processed_ranges[start_bubble:end_bubble] = 0.0
 
         # Find max length sequence of non-zero lengths
         max_gap_index_start = 0
@@ -78,6 +76,12 @@ class ReactiveFollowGap(Node):
                 if current_gap_counter == 0:
                     current_gap_index_start = i
                 current_gap_counter += 1
+
+        # Handle case where gap is at the end
+        if current_gap_counter > max_gap_counter:
+            max_gap_counter = current_gap_counter
+            max_gap_index_start = current_gap_index_start
+
 
         return (max_gap_index_start, max_gap_index_start + max_gap_counter)
 
