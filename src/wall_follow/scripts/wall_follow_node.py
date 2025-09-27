@@ -112,9 +112,9 @@ class WallFollow(Node):
         drive_msg = AckermannDriveStamped()
         drive_msg.drive.steering_angle = -angle
 
-        if np.abs(np.radians(angle)) >= 0.0 and np.abs(np.radians(angle)) < 10.0:
+        if np.abs(np.degrees(angle)) >= 0.0 and np.abs(np.degrees(angle)) < 10.0:
             drive_msg.drive.speed = self.VELOCITY
-        elif np.abs(np.radians(angle)) >= 10.0 and np.abs(np.radians(angle)) < 20.0:
+        elif np.abs(np.degrees(angle)) >= 10.0 and np.abs(np.degrees(angle)) < 20.0:
             drive_msg.drive.speed = self.VELOCITY * 0.66
         else:
             drive_msg.drive.speed = self.VELOCITY * 0.33
