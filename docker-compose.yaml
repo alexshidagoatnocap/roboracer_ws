@@ -1,0 +1,16 @@
+services: 
+  roboracer:
+    build: .
+    container_name: roboracer_ws
+    volumes:
+      - .:/roboracer_ws
+    working_dir: /roboracer_ws
+    networks:
+      - f1tenth_gym_ros_x11 #same network as the one in the f1tenth_gym_ros repo
+    stdin_open: true
+    tty: true
+    command: /bin/bash && source /opt/ros/foxy/setup.bash
+
+networks:
+  f1tenth_gym_ros_x11:
+    external: true
