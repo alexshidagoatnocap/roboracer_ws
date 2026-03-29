@@ -9,7 +9,7 @@ services:
       - f1tenth_gym_ros_x11 #same network as the one in the f1tenth_gym_ros repo
     stdin_open: true
     tty: true
-    command: /bin/bash && source /opt/ros/foxy/setup.bash
+    command: /bin/bash && source /opt/ros/humble/setup.bash
 
 networks:
   f1tenth_gym_ros_x11:

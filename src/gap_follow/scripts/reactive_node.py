@@ -15,7 +15,7 @@ class ReactiveFollowGap(Node):
     def __init__(self):
         super().__init__('reactive_node')
 
-        self.velocity = 5.0
+        self.velocity = 4.5
         self.max_distance_threshold = 4.0
         self.max_steering_angle = np.radians(40.0)
         self.max_steering_sensitivity = 0.6
