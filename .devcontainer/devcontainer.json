@@ -2,5 +2,5 @@
   "name": "my-devpod-workspace",
   "dockerComposeFile": "../docker-compose.yaml",
   "service": "roboracer",
-  "workspaceFolder": "/workspace"
+  "workspaceFolder": "/roboracer_ws"
 }
